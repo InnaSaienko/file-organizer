@@ -53,6 +53,8 @@ or
 node file-organizer.js
 ```
 
+This will display all available commands including `scan` and `duplicates`.
+
 ---
 
 ## 🛠️ Available Commands
@@ -69,7 +71,6 @@ node file-organizer.js scan /path/to/directory
 ```bash
 npm run scan -- ~/Downloads
 ```
-
 **Output:**
 ```
 📂 Scanning: /Users/student/Downloads
@@ -96,6 +97,43 @@ Largest files:
   3. presentation.pptx     89 MB
 
 Oldest file: old_report.pdf (modified 365 days ago)
+```
+
+---
+
+### 🔄 `duplicates` – Find Duplicate Files
+Scans the specified directory and finds duplicate files using SHA-256 hashing. Efficiently processes large files using streams.
+
+**Syntax:**
+```bash
+node file-organizer.js duplicates /path/to/directory
+```
+
+**Example:**
+```bash
+npm run duplicates -- ~/Downloads
+```
+
+**Output:**
+```
+🔍 Searching for duplicates in: /Users/student/Downloads
+Processing files... ███████████████████ 247/247
+
+📋 Duplicate Files Found:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total duplicate groups: 3
+
+Group 1 (SHA-256: a1b2c3...):
+  1. /Downloads/image1.jpg (1.2 MB)
+  2. /Downloads/image1_copy.jpg (1.2 MB)
+
+Group 2 (SHA-256: d4e5f6...):
+  1. /Downloads/document.pdf (2.5 MB)
+  2. /Downloads/document_backup.pdf (2.5 MB)
+
+Group 3 (SHA-256: g7h8i9...):
+  1. /Downloads/notes.txt (12 KB)
+  2. /Downloads/notes_old.txt (12 KB)
 ```
 
 ---
