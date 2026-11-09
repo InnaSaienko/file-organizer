@@ -42,6 +42,17 @@ Or via npm scripts:
 npm run <command> -- [options] <directory>
 ```
 
+### 🔹 Help Command
+
+To see available commands and usage instructions:
+```bash
+node file-organizer.js --help
+```
+or
+```bash
+node file-organizer.js
+```
+
 ---
 
 ## 🛠️ Available Commands
@@ -88,177 +99,6 @@ Oldest file: old_report.pdf (modified 365 days ago)
 ```
 
 ---
-
-### 🔎 `duplicates` – Find Duplicate Files
-Finds files with identical content by computing **SHA-256 hashes** and shows wasted disk space.
-
-**Syntax:**
-```bash
-node file-organizer.js duplicates /path/to/directory
-```
-
-**Example:**
-```bash
-npm run duplicates -- ~/Downloads
-```
-
-**Output:**
-```
-🔍 Searching for duplicates in: /Users/student/Downloads
-Calculating hashes... ████████████████████ 247/247 files
-
-Found 3 duplicate groups (8.7 MB wasted):
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Group 1 (3 copies, 3.2 MB each):
-  SHA-256: a3f2e1b8c4d5...
-  
-  📄 Downloads/lecture.pdf
-  📄 Downloads/lecture(1).pdf
-  📄 Downloads/backup/lecture_copy.pdf
-  
-  Wasted space: 6.4 MB
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💾 Total wasted space: 8.7 MB
-```
-
----
-
-### 📦 `organize` – Organize Files by Categories
-Copies files from the source directory to the target directory, organizing them into categories (**Documents**, **Images**, **Archives**, **Code**, **Videos**, **Other**).
-
-**Syntax:**
-```bash
-node file-organizer.js organize /source/directory --output /target/directory
-```
-
-**Example:**
-```bash
-npm run organize -- ~/Downloads --output ~/Organized
-```
-
-**Output:**
-```
-📦 Organizing: /Users/student/Downloads
-Target: /Users/student/Organized
-
-Creating folders...
-  ✓ Documents/
-  ✓ Images/
-  ✓ Archives/
-  ✓ Code/
-  ✓ Videos/
-  ✓ Other/
-
-Copying files... ████████████████████ 247/247
-
-✅ Organization complete!
-
-Summary:
-  Documents: 134 files → Organized/Documents/
-  Images:     67 files → Organized/Images/
-  Archives:   23 files → Organized/Archives/
-  Code:       12 files → Organized/Code/
-  Videos:      8 files → Organized/Videos/
-  Other:       3 files → Organized/Other/
-
-Total copied: 247 files (1.2 GB)
-```
-
-**File Categories:**
-| Category   | Extensions                                                                 |
-|------------|----------------------------------------------------------------------------|
-| Documents  | `.pdf`, `.docx`, `.doc`, `.txt`, `.md`, `.xlsx`, `.pptx`                  |
-| Images     | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.bmp`                  |
-| Archives   | `.zip`, `.rar`, `.tar`, `.gz`, `.7z`                                      |
-| Code       | `.js`, `.py`, `.java`, `.cpp`, `.html`, `.css`, `.json`                   |
-| Videos     | `.mp4`, `.avi`, `.mkv`, `.mov`, `.webm`                                  |
-| Other      | All other extensions                                                      |
-
----
-
-### 🧹 `cleanup` – Delete Old Files
-Finds and deletes files older than the specified number of days. By default, it runs in **dry run mode** (shows the list without deletion).
-
-**Syntax:**
-```bash
-# Show list of old files (without deletion)
-node file-organizer.js cleanup /path/to/directory --older-than 90
-
-# Delete files with confirmation
-node file-organizer.js cleanup /path/to/directory --older-than 90 --confirm
-```
-
-**Example (Dry Run):**
-```bash
-npm run cleanup -- ~/Downloads --older-than 90
-```
-
-**Output (Dry Run):**
-```
-🧹 Cleanup: /Users/student/Downloads
-Looking for files older than 90 days...
-
-Found 45 files to delete:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-old_report.pdf
-  Size: 2.3 MB
-  Modified: 120 days ago (2024-09-05)
-
-backup_2023.zip
-  Size: 45 MB
-  Modified: 180 days ago (2023-07-08)
-... (42 more files)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Total: 45 files (156 MB)
-
-⚠️  DRY RUN MODE: No files were deleted.
-To actually delete these files, run with --confirm flag.
-```
-
-**Example (With Deletion):**
-```bash
-npm run cleanup -- ~/Downloads --older-than 90 --confirm
-```
-
-**Output (With Deletion):**
-```
-🧹 Cleanup: /Users/student/Downloads
-Looking for files older than 90 days...
-
-Found 45 files to delete:
-... (file list) ...
-
-⚠️  DELETING 45 files (156 MB). This action cannot be undone!
-
-Deleting... ████████████████████ 45/45
-
-✅ Cleanup complete!
-Deleted: 45 files (156 MB freed)
-```
-
----
-
-## 📁 Project Structure
-```
-file-organizer/
-├── package.json          # Project configuration
-├── .gitignore            # Files excluded from Git
-├── README.md             # Documentation
-├── file-organizer.js     # Entry point
-└── lib/
-    ├── scanner.js        # `scan` command
-    ├── duplicates.js     # `duplicates` command
-    ├── organizer.js      # `organize` command
-    └── cleanup.js        # `cleanup` command
-```
-
----
-
-## ⚙️ Technical Details
 
 ### Event-Driven Architecture (`EventEmitter`)
 Each command is implemented as a class extending `EventEmitter`, separating business logic from progress display.
