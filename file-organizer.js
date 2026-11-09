@@ -2,6 +2,10 @@ import { getActionHandler } from './utils/actionMap.js';
 import process from 'process';
 import {showHelp} from "./utils/showHelp.js";
 import {handleScan} from "./handlers/scanHandler.js";
+import { parseArgs } from './utils/parseArgs.js';
+import { handleDuplicates } from './handlers/handleDuplicates.js';
+import { handleOrganize } from './handlers/handleOrganize.js';
+import { handleCleanup } from './handlers/handleCleanup.js';
 
 // Main function to handle commands
 async function main() {
