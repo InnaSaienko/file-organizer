@@ -16,3 +16,12 @@ export const drawProgressBar = (current, total, width = 20) =>{
     const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(width - filled);
     return `${bar} ${current}/${total}`;
 }
+
+export const categories = {
+    Documents: ['.pdf', '.docx', '.doc', '.txt', '.md', '.xlsx', '.pptx'],
+    Images: ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp'],
+    Archives: ['.zip', '.rar', '.tar', '.gz', '.7z'],
+    Code: ['.js', '.py', '.java', '.cpp', '.html', '.css', '.json'],
+    Videos: ['.mp4', '.avi', '.mkv', '.mov', '.webm'],
+    Other: []
+};
