@@ -1,3 +1,6 @@
+import path from "path";
+import { promises as fsp } from 'node:fs';
+
 export const formatSize = (bytes) => {
     if (bytes < 1024) {
         return `${bytes} bytes`;
@@ -25,3 +28,28 @@ export const categories = {
     Videos: ['.mp4', '.avi', '.mkv', '.mov', '.webm'],
     Other: []
 };
+
+export async function getUniqueFilename(filePath) {
+    let uniquePath = filePath;
+    let counter = 1;
+    const dir = path.dirname(filePath);
+    const ext = path.extname(filePath);
+    const base = path.basename(filePath, ext);
+
+    while (await fsp.access(uniquePath).then(() => true).catch(() => false)) {
+        uniquePath = path.join(dir, `${base}(${counter})${ext}`);
+        counter++;
+    }
+
+    return uniquePath;
+}
+
+export function getCategory(filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    for (const [category, extensions] of Object.entries(categories)) {
+        if (extensions.includes(ext)) {
+            return category;
+        }
+    }
+    return "Other";
+}

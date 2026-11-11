@@ -148,7 +148,7 @@ import { EventEmitter } from 'events';
 class Scanner extends EventEmitter {
   async scan(directory) {
     this.emit('scan-start', { directory });
-    // ... обробка файлів
+    // ... file processing
     this.emit('file-found', { path: filePath, size: fileSize });
     this.emit('scan-complete', { totalFiles, totalSize });
   }
@@ -192,18 +192,19 @@ function calculateHash(filePath) {
 All file operations are wrapped in `try...catch` with specific messages for error codes (`ENOENT`, `EACCES`, etc.).
 
 **Example:**
+
 ```javascript
 try {
-  const files = await fs.readdir(directory);
+    const files = await fsp.readdir(directory);
 } catch (error) {
-  if (error.code === 'ENOENT') {
-    console.error(`❌ Error: Directory not found: ${directory}`);
-  } else if (error.code === 'EACCES') {
-    console.error(`❌ Error: Permission denied: ${directory}`);
-  } else {
-    console.error(`❌ Unexpected error: ${error.message}`);
-  }
-  process.exit(1);
+    if (error.code === 'ENOENT') {
+        console.error(`❌ Error: Directory not found: ${directory}`);
+    } else if (error.code === 'EACCES') {
+        console.error(`❌ Error: Permission denied: ${directory}`);
+    } else {
+        console.error(`❌ Unexpected error: ${error.message}`);
+    }
+    process.exit(1);
 }
 ```
 
