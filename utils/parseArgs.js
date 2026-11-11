@@ -6,7 +6,7 @@ export const parseArgs = (args) => {
 
     for (let i = 3; i < args.length; i++) {
         if (args[i].startsWith('--')) {
-            const key = args[i].substring(2);
+            const key = args[i].substring(2).replace('-', '');
             if (args[i + 1] && !args[i + 1].startsWith('--')) {
                 options[key] = args[i + 1];
                 i++;
