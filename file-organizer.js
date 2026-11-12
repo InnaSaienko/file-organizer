@@ -12,13 +12,13 @@ async function main() {
   const args = process.argv;
   const { command, options, positional } = parseArgs(args);
 
-  // In main(), after parsing args:
-  if (!command || options.help) {
+  if (!command || options.help || command === '--help' || command === 'help') {
     showHelp();
   }
 
   const directory = positional[0];
-  if (!directory && command !== 'help') {
+
+  if (!directory) {
     console.error('Error: Please specify a directory path.');
     process.exit(1);
   }
