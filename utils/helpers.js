@@ -53,3 +53,26 @@ export function getCategory(filePath) {
     }
     return "Other";
 }
+
+export const msPerDay = 24 * 60 * 60 * 1000;
+
+export async function getAllFiles(directory, { excludeDirs = [], includeDirs = false } = {}) {
+    const files = [];
+    const entries = await fsp.readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(directory, entry.name);
+
+        if (entry.isDirectory()) {
+            if (excludeDirs.includes(entry.name)) {
+                continue; // Skip excluded directories
+            }
+            const subFiles = await getAllFiles(fullPath, { excludeDirs, includeDirs });
+            files.push(...subFiles);
+        } else if (entry.isFile() || includeDirs) {
+            files.push(fullPath);
+        }
+    }
+
+    return files;
+}

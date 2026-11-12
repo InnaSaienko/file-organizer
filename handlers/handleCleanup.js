@@ -1,37 +1,44 @@
 // Handle cleanup command
 import Cleanup from "../lib/cleanup.js";
-import { formatSize, drawProgressBar } from "../utils/helpers.js";
+import {formatSize, drawProgressBar, msPerDay} from "../utils/helpers.js";
 import * as path from "node:path";
 
 export async function handleCleanup(directory, options) {
+    if (options.olderThan !== undefined) {
+        const timeLimit = Number(options.olderThan);
+        if (isNaN(timeLimit) || timeLimit < 0) {
+            throw new Error("--olderThan must be a positive number");
+        }
+    }
+
     const cleanup = new Cleanup();
-    const timeLimit = parseInt(options.olderThan) || 0;
+    const timeLimit = parseInt(options.olderthan) || 0;
     const confirm = options.confirm || false;
 
-    cleanup.on('cleanup-start', ({ directory, timeLimit }) => {
+    cleanup.on('cleanup-start', ({directory, timeLimit}) => {
         console.log(`🧹 Cleanup: ${directory}`);
         console.log(`Looking for files older than ${timeLimit} days...\n`);
     });
 
-    cleanup.on('file-found', ({ filePath, size, mtime }) => {
+    cleanup.on('file-found', ({filePath, size, mtime}) => {
         const fileName = path.basename(filePath);
-        const daysAgo = Math.floor((Date.now() - mtime.getTime()) / (1000 * 60 * 60 * 24));
+        const daysAgo = Math.floor((Date.now() - mtime.getTime()) / msPerDay);
         const date = mtime.toISOString().split('T')[0];
         console.log(`${fileName}`);
         console.log(`  Size: ${formatSize(size)}`);
         console.log(`  Modified: ${daysAgo} days ago (${date})\n`);
     });
 
-    cleanup.on('deleting-start', ({ count, totalSize }) => {
+    cleanup.on('deleting-start', ({count, totalSize}) => {
         console.log(`\n⚠️  DELETING ${count} files (${formatSize(totalSize)}). This action cannot be undone!\n`);
         console.log('Deleting...');
     });
 
-    cleanup.on('file-deleted', ({ current, total }) => {
+    cleanup.on('file-deleted', ({current, total}) => {
         process.stdout.write(`\r${drawProgressBar(current, total)} ${current}/${total}`)
     });
 
-    cleanup.on('cleanup-complete', ({ files, totalSize, confirm }) => {
+    cleanup.on('cleanup-complete', ({files, totalSize, confirm}) => {
         console.log(confirm ? '\n' : '');
         if (files.length === 0) {
             console.log('No old files found.');
@@ -48,6 +55,7 @@ export async function handleCleanup(directory, options) {
     });
 
     cleanup.on('delete-error', ((filePath, error) => {
+        process.stdout.write('\r' + ' '.repeat(50) + '\r');
         console.error(`\n❌ Failed to delete: ${filePath}`);
         console.error(`Reason: ${error}`);
     }));

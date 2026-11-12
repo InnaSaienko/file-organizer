@@ -1,22 +1,25 @@
 // Handle scan command
-import {drawProgressBar, formatSize} from "../utils/helpers.js";
+import {drawProgressBar, formatSize, getAllFiles} from "../utils/helpers.js";
 import Scanner from "../lib/scanner.js";
+import {validatePath} from "../utils/validatePath.js";
 
 export async function handleScan(directory) {
+    const resolvedDir = await validatePath(directory);
+
     const scanner = new Scanner();
     let processedFiles = 0;
     let totalFiles = 0;
 
     // Get total files first for progress bar
     try {
-        const files = await scanner.getAllFiles(directory);
+        const files = await getAllFiles(resolvedDir);
         totalFiles = files.length;
     } catch (error) {
         console.error(`Error: ${error.message}`);
         process.exit(1);
     }
 
-    console.log(`📂 Scanning: ${directory}`);
+    console.log(`📂 Scanning of resolved dir: ${resolvedDir}`);
 
     scanner.on('file-found', () => {
         processedFiles++;
@@ -55,5 +58,5 @@ export async function handleScan(directory) {
         }
     });
 
-    await scanner.scan(directory);
+    await scanner.scan(resolvedDir);
 }

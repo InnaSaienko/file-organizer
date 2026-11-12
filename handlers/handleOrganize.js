@@ -5,7 +5,7 @@ import path from "path";
 
 export async function handleOrganize(directory, options) {
     const organizer = new Organizer();
-    1.
+
     organizer.on('organize-start', ({sourceDir, targetDir}) => {
         console.log(`📦 Organizing: ${sourceDir}`);
         console.log(`Target: ${targetDir}\n`);
