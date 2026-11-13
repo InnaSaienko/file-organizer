@@ -11,7 +11,7 @@ export const parseArgs = (args) => {
                 options[key] = args[i + 1];
                 i++;
             } else {
-                options[key] = true;
+                options[key] = null;
             }
         } else {
             positional.push(args[i]);

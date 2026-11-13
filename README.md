@@ -1,19 +1,15 @@
 # File Organizer CLI
 
-**File Organizer** is a Node.js CLI tool designed to automate file organization in your `Downloads` directory (or any other). It helps analyze directory contents, find duplicates, organize files by categories, and delete outdated files.
+**File Organizer** is a Node.js CLI tool designed to automate file organization in any directory. It helps analyze directory contents, find duplicates, organize files by categories, and delete outdated files.
 
-## 📌 Task Description
-This project is a practical assignment from the **Node.js** course, implementing a CLI application for file management. It demonstrates the following concepts:
-- File system operations (`fs`, `fs/promises`)
-- Event-driven architecture using `EventEmitter`
-- Handling large files via `streams`
-- Asynchronous programming (`async/await`, `Promises`)
-- SHA-256 hashing for duplicate detection
-- Error handling with `try...catch`
+## Features
 
----
+- **Scan**: Recursively analyze directories with file statistics (count, sizes, types, age)
+- **Duplicates**: Find duplicate files using SHA-256 hashing with stream-based processing
+- **Organize**: Automatically categorize files into folders (Documents, Images, Archives, Code, Videos, Other)
+- **Cleanup**: Find and delete old files with dry-run mode and confirmation
 
-## 🚀 Installation
+## Installation
 
 ### 1. Clone the Repository
 ```bash
@@ -26,58 +22,60 @@ cd file-organizer
 npm install
 ```
 
-*(No dependencies are required if you only use built-in Node.js modules.)*
+*(Uses built-in Node.js modules: fs, path, crypto, events, stream)*
 
 ---
 
-## 📖 Usage
+## Usage
 
-### 🔹 General Syntax
+### General Syntax
 ```bash
 node file-organizer.js <command> [options] <directory>
 ```
 
-Or via npm scripts:
-```bash
-npm run <command> -- [options] <directory>
-```
+### Available Commands
 
-### 🔹 Help Command
+| Command | Description | Options |
+|---------|-------------|---------|
+| `scan` | Analyze directory and show file statistics | None |
+| `duplicates` | Find duplicate files using SHA-256 hashes | None |
+| `organize` | Organize files into categories | `--target <dir>` |
+| `cleanup` | Find and delete old files | `--olderThan <days>`, `--confirm` |
+| `--help` | Show help message | None |
 
+### Help
 To see available commands and usage instructions:
 ```bash
 node file-organizer.js --help
 ```
 or
 ```bash
-node file-organizer.js
+node file-organizer.js help
 ```
-
-This will display all available commands including `scan` and `duplicates`.
 
 ---
 
-## 🛠️ Available Commands
+## Commands in Detail
 
-### 🔍 `scan` – Directory Analysis
+### `scan` - Directory Analysis
 Recursively scans the specified directory and collects statistics about files: count, sizes, types, and age.
 
 **Syntax:**
 ```bash
-node file-organizer.js scan /path/to/directory
+node file-organizer.js scan <directory>
 ```
 
 **Example:**
 ```bash
-npm run scan -- ~/Downloads
+node file-organizer.js scan ~/Downloads
 ```
+
 **Output:**
 ```
-📂 Scanning: /Users/student/Downloads
-Processing... ████████████████████ 247/247 files
+Scanning of resolved dir: /Users/username/Downloads
+Processing... [progress bar] 247/247 files
 
-📊 Scan Results:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Scan Results:
 Total files: 247
 Total size: 1.2 GB
 
@@ -101,116 +99,203 @@ Oldest file: old_report.pdf (modified 365 days ago)
 
 ---
 
-### 🔄 `duplicates` – Find Duplicate Files
-Scans the specified directory and finds duplicate files using SHA-256 hashing. Efficiently processes large files using streams.
+### `duplicates` - Find Duplicate Files
+Scans the specified directory and finds duplicate files using SHA-256 hashing. Uses streams for efficient processing of large files.
 
 **Syntax:**
 ```bash
-node file-organizer.js duplicates /path/to/directory
+node file-organizer.js duplicates <directory>
 ```
 
 **Example:**
 ```bash
-npm run duplicates -- ~/Downloads
+node file-organizer.js duplicates ~/Downloads
 ```
 
 **Output:**
 ```
-🔍 Searching for duplicates in: /Users/student/Downloads
-Processing files... ███████████████████ 247/247
+Searching for duplicates in: /Users/username/Downloads
+Calculating hashes... [progress bar] 247/247 files
 
-📋 Duplicate Files Found:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total duplicate groups: 3
+Found 3 duplicate groups (450 MB wasted):
 
-Group 1 (SHA-256: a1b2c3...):
-  1. /Downloads/image1.jpg (1.2 MB)
-  2. /Downloads/image1_copy.jpg (1.2 MB)
+Group 1 (2 copies, 1.2 MB each):
+  SHA-256: a1b2c3d4e5f6...
+  image1.jpg
+  image1_copy.jpg
+  Wasted space: 1.2 MB
 
-Group 2 (SHA-256: d4e5f6...):
-  1. /Downloads/document.pdf (2.5 MB)
-  2. /Downloads/document_backup.pdf (2.5 MB)
+Group 2 (2 copies, 2.5 MB each):
+  SHA-256: d4e5f6g7h8i9...
+  document.pdf
+  document_backup.pdf
+  Wasted space: 2.5 MB
 
-Group 3 (SHA-256: g7h8i9...):
-  1. /Downloads/notes.txt (12 KB)
-  2. /Downloads/notes_old.txt (12 KB)
+Total wasted space: 450 MB
 ```
 
 ---
 
-### Event-Driven Architecture (`EventEmitter`)
-Each command is implemented as a class extending `EventEmitter`, separating business logic from progress display.
+### `organize` - Organize Files into Categories
+Organizes files into category folders. Files are copied (not moved) to maintain originals.
 
-**Example (Scanner):**
-```javascript
-import { EventEmitter } from 'events';
-
-class Scanner extends EventEmitter {
-  async scan(directory) {
-    this.emit('scan-start', { directory });
-    // ... file processing
-    this.emit('file-found', { path: filePath, size: fileSize });
-    this.emit('scan-complete', { totalFiles, totalSize });
-  }
-}
+**Syntax:**
+```bash
+node file-organizer.js organize <directory> [--target <target_directory>]
 ```
 
-### Handling Large Files (`streams`)
-For files **≥10 MB**, `streams` are used instead of `fs.readFile()` or `fs.copyFile()` to avoid memory overload.
-
-**Example (Copying a Large File):**
-```javascript
-import { pipeline } from 'stream/promises';
-import fs from 'fs';
-
-await pipeline(
-  fs.createReadStream(sourcePath),
-  fs.createWriteStream(targetPath)
-);
-```
-
-### Hashing (SHA-256)
-For duplicate detection, `crypto.createHash('sha256')` is used with `fs.createReadStream()` for efficient processing of large files.
+**Options:**
+- `--target <dir>`: Custom target directory (default: `<directory>/Organized`)
 
 **Example:**
-```javascript
-import crypto from 'crypto';
-import fs from 'fs';
-
-function calculateHash(filePath) {
-  return new Promise((resolve, reject) => {
-    const hash = crypto.createHash('sha256');
-    const stream = fs.createReadStream(filePath);
-    stream.on('data', (chunk) => hash.update(chunk));
-    stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', reject);
-  });
-}
+```bash
+node file-organizer.js organize ~/Downloads --target ~/Sorted
 ```
+
+**Categories:**
+- **Documents**: .pdf, .docx, .doc, .txt, .md, .xlsx, .pptx
+- **Images**: .png, .jpg, .jpeg, .gif, .svg, .webp, .bmp
+- **Archives**: .zip, .rar, .tar, .gz, .7z
+- **Code**: .js, .py, .java, .cpp, .html, .css, .json
+- **Videos**: .mp4, .avi, .mkv, .mov, .webm
+- **Other**: All other file types
+
+**Output:**
+```
+Organizing: /Users/username/Downloads
+Target: /Users/username/Downloads/Organized
+
+Creating folders...
+  Documents/
+  Images/
+  Archives/
+  Code/
+  Videos/
+  Other/
+Copying files... [progress bar]
+
+Organization complete!
+
+Summary:
+  Documents: 45 files -> /Users/username/Downloads/Organized/Documents/
+  Images: 67 files -> /Users/username/Downloads/Organized/Images/
+  Archives: 23 files -> /Users/username/Downloads/Organized/Archives/
+  Code: 12 files -> /Users/username/Downloads/Organized/Code/
+  Videos: 8 files -> /Users/username/Downloads/Organized/Videos/
+  Other: 92 files -> /Users/username/Downloads/Organized/Other/
+
+Total copied: 247 files (1.2 GB)
+```
+
+**Note:** Files >=10 MB are copied using streams to avoid memory issues.
+
+---
+
+### `cleanup` - Delete Old Files
+Finds and optionally deletes files older than a specified number of days.
+
+**Syntax:**
+```bash
+node file-organizer.js cleanup <directory> --olderThan <days> [--confirm]
+```
+
+**Options:**
+- `--olderThan <days>`: Delete files older than this many days (required)
+- `--confirm`: Actually delete files (without this flag, runs in dry-run mode)
+
+**Example (dry run):**
+```bash
+node file-organizer.js cleanup ~/Downloads --olderThan 30
+```
+
+**Example (actual deletion):**
+```bash
+node file-organizer.js cleanup ~/Downloads --olderThan 30 --confirm
+```
+
+**Output (dry run):**
+```
+Cleanup: /Users/username/Downloads
+Looking for files older than 30 days...
+
+old_report.pdf
+  Size: 2.5 MB
+  Modified: 45 days ago (2024-10-01)
+
+backup.zip
+  Size: 150 MB
+  Modified: 60 days ago (2024-09-15)
+
+DELETING 2 files (152.5 MB). This action cannot be undone!
+
+Deleting... [progress bar]
+
+Total: 2 files (152.5 MB)
+
+DRY RUN MODE: No files were deleted.
+To actually delete these files, run with --confirm flag.
+```
+
+---
+
+## Architecture
+
+### Event-Driven Design
+Each command uses `EventEmitter` to separate business logic from progress display:
+
+- **Scanner**: Emits `file-found`, `scan-complete`
+- **Duplicates**: Emits `file-processed`, `duplicates-found`
+- **Organizer**: Emits `organize-start`, `creating-folders`, `folder-created`, `copy-start`, `copy-complete`, `copy-error`, `organize-complete`
+- **Cleanup**: Emits `cleanup-start`, `file-found`, `deleting-start`, `file-deleted`, `delete-error`, `cleanup-complete`
+
+### Stream-Based Processing
+For files >=10 MB, streams are used to avoid memory overload:
+- File copying in `organize` command
+- Hash calculation in `duplicates` command
 
 ### Error Handling
-All file operations are wrapped in `try...catch` with specific messages for error codes (`ENOENT`, `EACCES`, etc.).
+All file operations include comprehensive error handling with specific messages for:
+- `ENOENT`: Directory or file not found
+- `EACCES`/`EPERM`: Permission denied
+- Other unexpected errors
 
-**Example:**
+### Path Validation
+All directory paths are validated to ensure they:
+- Exist
+- Are accessible
+- Are within the current working directory (security)
 
-```javascript
-try {
-    const files = await fsp.readdir(directory);
-} catch (error) {
-    if (error.code === 'ENOENT') {
-        console.error(`❌ Error: Directory not found: ${directory}`);
-    } else if (error.code === 'EACCES') {
-        console.error(`❌ Error: Permission denied: ${directory}`);
-    } else {
-        console.error(`❌ Unexpected error: ${error.message}`);
-    }
-    process.exit(1);
-}
+---
+
+## Project Structure
+
+```
+file-organizer/
+├── file-organizer.js          # Main CLI entry point
+├── package.json
+├── README.md
+├── lib/
+│   ├── scanner.js             # Scan command implementation
+│   ├── duplicates.js          # Duplicates command implementation
+│   ├── organizer.js           # Organize command implementation
+│   └── cleanup.js             # Cleanup command implementation
+├── handlers/
+│   ├── handleScan.js          # Scan command handler
+│   ├── handleDuplicates.js    # Duplicates command handler
+│   ├── handleOrganize.js      # Organize command handler
+│   └── handleCleanup.js       # Cleanup command handler
+└── utils/
+    ├── actionMap.js           # Command to handler mapping
+    ├── parseArgs.js           # CLI argument parsing
+    ├── validatePath.js        # Path validation
+    ├── showHelp.js            # Help display
+    └── helpers.js             # Shared utilities (formatSize, getAllFiles, etc.)
 ```
 
 ---
 
-## 🎯 Useful Links
+## Useful Links
+
 - [Node.js Documentation (fs module)](https://nodejs.org/api/fs.html)
 - [Node.js Documentation (streams)](https://nodejs.org/api/stream.html)
 - [Node.js Documentation (crypto module)](https://nodejs.org/api/crypto.html)
@@ -218,5 +303,8 @@ try {
 
 ---
 
-## 📜 License
+## License
+
 This project is created as an educational assignment and is not intended for commercial use.
+
+MIT License

@@ -1,10 +1,10 @@
 // Handle duplicates command
 import DuplicateFinder from "../lib/duplicates.js";
-import {drawProgressBar, formatSize, getAllFiles} from "../utils/helpers.js";
+import {drawProgressBar, formatSize} from "../utils/helpers.js";
 import {validatePath} from "../utils/validatePath.js";
 import path from "path";
 
-export async function handleDuplicates(directory) {
+export async function handleDuplicates(directory, options) {
     const resolvedDir = await validatePath(directory);
     const duplicateFinder = new DuplicateFinder();
 

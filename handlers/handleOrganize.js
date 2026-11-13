@@ -2,13 +2,37 @@
 import Organizer from "../lib/organizer.js";
 import {drawProgressBar, formatSize} from "../utils/helpers.js";
 import path from "path";
+import { promises as fsp} from "node:fs";
 
 export async function handleOrganize(directory, options) {
+
+    const targetDir = options.output
+        ? path.join(options.output, 'Organized')
+        : path.join(directory, '..', 'Organized');
+    console.log("Target directory before fsp.mkdir()", targetDir);
+
+    try{
+        const dirExists = await fsp.access(targetDir).then(() => true).catch(() => false);
+        if (dirExists) {
+            console.error(`❌ Directory '${targetDir}' already exists. Please choose a different directory.`);
+            process.exit(1);
+        }
+    } catch (e) {
+    }
+
+
+    await fsp.mkdir(targetDir, { recursive: true });
+
     const organizer = new Organizer();
 
     organizer.on('organize-start', ({sourceDir, targetDir}) => {
         console.log(`📦 Organizing: ${sourceDir}`);
         console.log(`Target: ${targetDir}\n`);
+    });
+
+    organizer.on('error', ({ message }) => {
+        console.error(`❌ ${message}`);
+        process.exit(1);
     });
 
     organizer.on('creating-folders', () => {
@@ -37,6 +61,7 @@ export async function handleOrganize(directory, options) {
         console.error(`\n❌ Failed to copy: ${filePath}`);
         console.error(`Reason: ${error}`);
     });
-    const targetDir = options.target || path.join(directory, 'Organized');
+
     await organizer.organize(directory, targetDir);
+    console.log("Target dir path: ", targetDir);
 }

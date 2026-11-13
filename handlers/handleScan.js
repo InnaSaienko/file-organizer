@@ -3,7 +3,7 @@ import {drawProgressBar, formatSize, getAllFiles} from "../utils/helpers.js";
 import Scanner from "../lib/scanner.js";
 import {validatePath} from "../utils/validatePath.js";
 
-export async function handleScan(directory) {
+export async function handleScan(directory, options) {
     const resolvedDir = await validatePath(directory);
 
     const scanner = new Scanner();
