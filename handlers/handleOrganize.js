@@ -9,7 +9,6 @@ export async function handleOrganize(directory, options) {
     const targetDir = options.output
         ? path.join(options.output, 'Organized')
         : path.join(directory, '..', 'Organized');
-    console.log("Target directory before fsp.mkdir()", targetDir);
 
     try{
         const dirExists = await fsp.access(targetDir).then(() => true).catch(() => false);
@@ -63,5 +62,4 @@ export async function handleOrganize(directory, options) {
     });
 
     await organizer.organize(directory, targetDir);
-    console.log("Target dir path: ", targetDir);
 }
