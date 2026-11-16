@@ -1,4 +1,6 @@
 // Helper function to parse command line arguments
+const BOOLEAN_FLAGS = new Set(['confirm', 'help']);
+
 export const parseArgs = (args) => {
     const command = args[2];
     const options = {};
@@ -6,17 +8,16 @@ export const parseArgs = (args) => {
 
     for (let i = 3; i < args.length; i++) {
         if (args[i].startsWith('--')) {
-            const key = args[i].substring(2).replace('-', '');
+            const key = args[i].substring(2).replace(/-/g, '');
             if (args[i + 1] && !args[i + 1].startsWith('--')) {
                 options[key] = args[i + 1];
                 i++;
             } else {
-                options[key] = null;
+                options[key] = BOOLEAN_FLAGS.has(key) ? true : null;
             }
         } else {
             positional.push(args[i]);
         }
     }
-
     return { command, options, positional };
 }
