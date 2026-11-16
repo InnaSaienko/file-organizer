@@ -4,17 +4,14 @@ import {formatSize, drawProgressBar, msPerDay} from "../utils/helpers.js";
 import * as path from "node:path";
 
 export async function handleCleanup(directory, options) {
-    if (options.olderThan !== undefined) {
-        const timeLimit = Number(options.olderThan);
-        if (isNaN(timeLimit) || timeLimit < 0) {
-            throw new Error("--olderThan must be a positive number");
-        }
+    const timeLimit = parseInt(options.olderthan, 10);
+    if (isNaN(timeLimit) || timeLimit <= 0) {
+        console.error('❌ Error: --older-than requires a positive number of days');
+        process.exit(1);
     }
 
     const cleanup = new Cleanup();
-    const timeLimit = parseInt(options.olderthan) || 0;
     const confirm = options.confirm || false;
-
     cleanup.on('cleanup-start', ({directory, timeLimit}) => {
         console.log(`🧹 Cleanup: ${directory}`);
         console.log(`Looking for files older than ${timeLimit} days...\n`);
@@ -54,12 +51,11 @@ export async function handleCleanup(directory, options) {
         }
     });
 
-    cleanup.on('delete-error', ((filePath, error) => {
+    cleanup.on('delete-error', (({filePath, error}) => {
         process.stdout.write('\r' + ' '.repeat(50) + '\r');
         console.error(`\n❌ Failed to delete: ${filePath}`);
         console.error(`Reason: ${error}`);
     }));
-
     await cleanup.cleanup(directory, timeLimit, confirm);
 
 }
